@@ -1,90 +1,14 @@
-from fastapi import FastAPI, HTTPException, status, Response, Depends
-from models import PersonagensJovensTitas
-from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from fastapi import FastAPI
+from routes import personagens
 
-app = FastAPI(title="API dos Jovens Titãs em Ação", version='0.0.1', description="Feita por Thainara Marques")
+app = FastAPI(
+    title="API dos Jovens Titãs em Ação",
+    version='0.0.2',
+    description="Feita por Thainara Marques"
+)
 
-def fake_db():
-    try:
-        print("Conectando com banco")
-    finally:
-        print("Fechando o banco")
+app.include_router(personagens.router)
 
-personagens = {
-    1: {
-        "nome": "Robin",
-        "idade": 16,
-        "habilidade": "Luta",
-        "foto": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaS68URB2vMR0AyugEPfnP3v4X8f0eW6qNeQ&s"
-    },
-    2: {
-        "nome": "Estelar",
-        "idade": 17,
-        "habilidade": "Voar, lazer",
-        "foto": "https://w7.pngwing.com/pngs/201/382/png-transparent-teen-titans-star-fire-illustration-starfire-raven-robin-cyborg-red-x-teen-titans-go.png"
-    },
-    3: {
-        "nome": "Ravena",
-        "idade": 17,
-        "habilidade": "Magia, telecinese",
-        "foto": "https://i.pinimg.com/originals/dd/e3/75/dde375660a9ee944d0596f44b00a175d.jpg"
-    },
-    4: {
-        "nome": "Mutano",
-        "idade": 15,
-        "habilidade": "Mutação em animais",
-        "foto": "https://static.wikia.nocookie.net/teen-titans-go/images/d/d4/2b6b161ef7f2bc36031c6f772fdb9cd7.png/revision/latest?cb=20200124150531&path-prefix=pt-br" 
-    },
-    5: {
-        "nome": "Ciborgue",
-        "idade": 19,
-        "habilidade": "Metade robô",
-        "foto": "https://i.pinimg.com/474x/44/20/82/442082b66b0bcef3315c33817476a53b.jpg"
-    }
-}
-
-@app.get("/")
-async def raiz():
-    return {"mensagem": "funcionou"}
-
-@app.get("/personagens")
-async def get_personagens(db: Any = Depends(fake_db)):
-    return personagens
-
-@app.get("/personagens/{personagem_id}", description="Retorna um personagem com um id específico", summary="Retorna um personagem")
-async def get_personagem(personagem_id: int):
-    try:
-        personagem = personagens[personagem_id]
-        return personagem
-    except KeyError:
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Personagem não encontrado")
-
-@app.post("/personagens", status_code=status.HTTP_201_CREATED)
-async def post_personagem(personagem: Optional[PersonagensJovensTitas] = None):
-    next_id = len(personagens) + 1
-    personagens[next_id] = personagem
-    del personagem.id
-    return personagem
-
-@app.put("/personagens/{personagem_id}", status_code=status.HTTP_202_ACCEPTED)
-async def put_personagem(personagem_id:int, personagem: PersonagensJovensTitas):
-    if personagem_id in personagens:
-        personagens[personagem_id] = personagem
-        personagem.id = personagem_id
-        del personagem.id
-        return personagem
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Personagem não encontrado")
-
-@app.delete("/personagens/{personagem_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_personagem(personagem_id:int):
-    if personagem_id in personagens:
-        del personagens[personagem_id]
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Personagem não encontrado")
-    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8001, log_level="info", reload=True)
