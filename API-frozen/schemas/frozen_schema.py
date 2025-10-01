@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel as SCBaseModel
 
 class FrozenSchema(SCBaseModel):
@@ -12,4 +12,18 @@ class FrozenSchema(SCBaseModel):
     class Config:
         orm_mode = True
 
-    
+class HistoriaBase(SCBaseModel):
+    titulo: str
+    descricao: Optional[str] = None
+    personagem_id: int
+
+
+class HistoriaSchema(HistoriaBase):
+    id: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+
+
+class PersonagemComHistorias(FrozenSchema):
+    historias: List[HistoriaSchema] = []

@@ -1,1 +1,1 @@
-from models.frozen_model import FrozenModel
+from .frozen_model import Personagem, Historia
